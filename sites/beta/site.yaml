@@ -1,0 +1,12 @@
+# The site's own words. The build reads this; nothing here is styling.
+title: "Beta"
+subtitle: "Stub subtitle for the second blog"
+base_url: "https://beta.example.com"   # placeholder until a domain is chosen
+links:
+  - {label: Posts, href: /}
+about: {label: About, href: /about/}
+# Rail sections, in order. top lists post slugs; the others are generated.
+rail:
+  top: []
+  blogroll: true
+  archive: true

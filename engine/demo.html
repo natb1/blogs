@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog Layout Harness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="blog-layout.css">
+<style>
+
+  /* Everything below is the harness, not the layout: a blog for the layout to hold,
+     written about the layout, so the page is its own documentation. */
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+</style>
+
+<div id="app"></div>
+
+<template id="t-top">
+  <ul class="blog-list" id="topList"></ul>
+</template>
+
+<template id="t-roll">
+  <ul class="blog-list" id="rollList"></ul>
+</template>
+
+<template id="t-archive">
+  <div id="archiveTree"></div>
+</template>
+
+<script src="blog-layout.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var pick = function (id) { return document.getElementById(id).content.cloneNode(true); };
+
+  /* ---- the blog -----------------------------------------------------------
+     A real blog would fetch pages from a server. This one is a list in memory,
+     served a page at a time with a delay, so the feed has something to wait for. */
+
+  var written = [
+    { id: 'reading-down', date: '2026-09-27', title: 'Reading down',
+      body: '<p>A blog is read down, so the layout is shaped for reading down. A banner across the top with a title, a subtitle and the site’s links, and an <b>About</b> link held to the right. Beneath it, the feed on the left and a rail on the right, each scrolling on its own.</p>' +
+            '<p>Scroll down. Nothing ends until the blog does.</p>' },
+    { id: 'linkable-headers', date: '2026-09-14', title: 'Every header is a link',
+      body: '<p>Hover a title and a <code>#</code> appears beside it. The title is the article’s link: copy it, send it, and whoever opens it lands here.</p>' +
+            '<p>The address bar keeps up without being asked. As you scroll, the hash changes to name the article you are reading, so the URL is always a link to what is on screen. It does so with <code>history.replaceState</code>, not by setting the hash, because the back button is for the places you went and not every article you scrolled past.</p>' },
+    { id: 'deep-links', date: '2026-08-30', title: 'Arriving on a deep link',
+      body: '<p>A link to an article that has not loaded yet is the interesting case. The feed only holds what has been fetched, and the article might be years down.</p>' +
+            '<p>So the layout keeps fetching until it arrives, then jumps to it. Try <a href="#hello-world">the first post</a>: the loading line flickers past a few times, and you land at the bottom of the blog.</p>' +
+            '<p>An app that knows its own index can pass <code>has(id)</code>, and a hash that names no article is then left alone rather than chased to the end of the feed.</p>' },
+    { id: 'the-rail', date: '2026-08-11', title: 'The rail',
+      body: '<p>Three sections by convention: the posts people read most, the blogs this one reads, and the archive. The blogroll carries an OPML button, the archive an RSS one — the two files a reader’s feed reader wants.</p>' +
+            '<p>The rail scrolls independently of the feed. Open every year of the archive and the rail grows a scrollbar of its own; the feed does not move.</p>' +
+            '<p>A link in the rail to the article on screen is marked current, so the archive quietly says where you are.</p>' },
+    { id: 'narrow-screens', date: '2026-07-19', title: 'On a narrow screen',
+      body: '<p>The rail cannot go under the feed: the feed never ends, so anything stacked beneath it would never be reached. When the two stop fitting side by side, the rail leaves the row and waits behind a button in the banner.</p>' +
+            '<p>The threshold is arithmetic, not a breakpoint: <code>--blog-rail-w</code> plus <code>--blog-feed-min</code>, read from the CSS rather than written out a second time in the script.</p>' +
+            '<p>The banner also sheds its subtitle once you start reading, because on a phone every line it holds is a line of article you cannot see.</p>' },
+    { id: 'the-api', date: '2026-06-28', title: 'The API',
+      body: '<pre><code>const blog = Blog.mount({\n  root, title, subtitle, home,\n  links:    [{ label, href, current }],\n  about:    { label, href },\n  sections: [{ id, title, content,\n               action: { href, label, icon } }],\n  load:     cursor =&gt; Promise&lt;{ articles, next }&gt;,\n  has:      id =&gt; bool,\n});\n\nblog.reveal(id)   blog.top()\nblog.section(id)  blog.feed()   blog.setAction(id, href)\nblog.openRail()   blog.closeRail()   blog.toggleRail()\nblog.on(\'article\'|\'load\'|\'mode\', fn)\nBlog.archive(entries)</code></pre>' +
+            '<p>An article is <code>{id, title, date, meta, content}</code>. <code>load</code> is called with nothing for the first page and with the previous page’s <code>next</code> after that; a <code>next</code> of null is the end.</p>' },
+    { id: 'what-a-site-brings', date: '2026-06-02', title: 'What a site brings',
+      body: '<p>Very little. Every colour comes from <code>tokens.css</code>; everything it draws is namespaced <code>blog-</code>; every dimension is a custom property an app can override; and an app talks to it through the object <code>mount()</code> returns, never its DOM.</p>' +
+            '<p>A site loads it as two files, <code>blog-layout.css</code> and <code>blog-layout.js</code>, after its own <code>tokens.css</code>.</p>' }
+  ];
+
+  var fillerTitles = [
+    'Notes from a slow week', 'On keeping a notebook', 'The case for plain text',
+    'Walking as a way of thinking', 'What the garden taught', 'Reading in the morning',
+    'Small tools, sharpened', 'A list of things that worked', 'Against the infinite inbox',
+    'Letters I did not send', 'The weight of a good pen', 'Winter light',
+    'Maintenance is the work', 'Five books, briefly', 'On finishing things',
+    'The long way round', 'An evening routine', 'Repairing a chair',
+    'What a margin is for', 'Rain, and other excuses', 'The second draft',
+    'A quiet year in review', 'On habits and their keeping', 'Paper, again',
+    'Learning to wait', 'A map of the neighbourhood', 'The first cold morning',
+    'Things I changed my mind about', 'Why this blog exists'
+  ];
+  var paras = [
+    'Most of what is worth doing is worth doing slowly, and most of what is done slowly is done badly at first. The trick is to keep going past the part where it is bad.',
+    'I wrote it down so I would not have to remember it, and then found I remembered it better for having written it down. That is the whole argument for a notebook.',
+    'The week had the usual shape: a plan on Monday, a revision on Wednesday, and on Friday a list of what actually happened, which was shorter and better.',
+    'There is a kind of attention that only arrives after the second hour. Nothing before it is wasted; it is how you get there.',
+    'A tool you understand completely is worth three you do not. It fails in ways you can predict, and so it barely fails at all.',
+    'I have come to think the useful question is not whether something is good, but whether it will still be good in a year, used every day.',
+    'Some of this will be wrong. It is written down so that, when it turns out to be, I will know exactly which part.'
+  ];
+
+  /* Filler, every three weeks or so back from the last written post, and one
+     first post at the very bottom for the deep-link demonstration. */
+  var posts = written.slice();
+  var t = Date.UTC(2026, 4, 12);
+  fillerTitles.forEach(function (title, i) {
+    var d = new Date(t - i * 19 * 864e5).toISOString().slice(0, 10);
+    var n = 2 + (i % 3), body = '';
+    for (var k = 0; k < n; k++) body += '<p>' + paras[(i * 3 + k) % paras.length] + '</p>';
+    posts.push({ id: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+                 date: d, title: title, body: body });
+  });
+  posts.push({ id: 'hello-world', date: '2024-09-01', title: 'Hello, world',
+    body: '<p>The first post. You got here by following a link to an article that had not been loaded; the feed fetched every page between the top and here to find it.</p>' +
+          '<p><a href="#">Back to the top</a> — a bare <code>#</code> scrolls the feed home.</p>' });
+
+  var index = {};
+  posts.forEach(function (p) { index[p.id] = p; });
+
+  var PAGE = 5, LATENCY = 280;
+  function load(cursor) {
+    var from = cursor || 0;
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        var slice = posts.slice(from, from + PAGE);
+        resolve({
+          articles: slice.map(function (p) {
+            var words = p.body.replace(/<[^>]+>/g, ' ').split(/\s+/).length;
+            return { id: p.id, title: p.title, date: p.date, content: p.body,
+                     meta: Math.max(1, Math.round(words / 220)) + ' min read' };
+          }),
+          next: from + PAGE < posts.length ? from + PAGE : null
+        });
+      }, LATENCY);
+    });
+  }
+
+  /* ---- the two files the rail offers ----------------------------------------
+     Built here as blobs so the buttons download something real. A site would
+     serve them at /feed.xml and /blogroll.opml. */
+
+  var roll = [
+    { title: 'Field Notes',        site: 'https://field-notes.example.org', note: 'On walking and maps' },
+    { title: 'The Slow Web',       site: 'https://slowweb.example.net',     note: 'Small sites, kept' },
+    { title: 'Marginalia',         site: 'https://marginalia.example.com',  note: 'Reading, annotated' },
+    { title: 'Workbench',          site: 'https://workbench.example.org',   note: 'Tools and repair' },
+    { title: 'Plain Text Weekly',  site: 'https://plaintext.example.com',   note: 'Once a week, no more' }
+  ];
+  var esc = function (s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  };
+  var base = location.href.split('#')[0];
+  function blob(text, type) {
+    try { return URL.createObjectURL(new Blob([text], { type: type })); } catch (e) { return '#'; }
+  }
+  var opml = blob('<?xml version="1.0" encoding="UTF-8"?>\n<opml version="2.0"><head><title>Blogroll</title></head><body>\n' +
+    roll.map(function (b) {
+      return '  <outline type="rss" text="' + esc(b.title) + '" htmlUrl="' + esc(b.site) + '" xmlUrl="' + esc(b.site + '/feed.xml') + '"/>';
+    }).join('\n') + '\n</body></opml>\n', 'text/x-opml');
+  var rss = blob('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>Reading Down</title><link>' + esc(base) + '</link><description>A blog about its own layout</description>\n' +
+    posts.map(function (p) {
+      var d = new Date(p.date + 'T00:00:00Z').toUTCString();
+      return '  <item><title>' + esc(p.title) + '</title><link>' + esc(base + '#' + p.id) + '</link><guid>' + esc(base + '#' + p.id) + '</guid><pubDate>' + d + '</pubDate></item>';
+    }).join('\n') + '\n</channel></rss>\n', 'application/rss+xml');
+
+  /* ---- mount ----------------------------------------------------------------- */
+
+  var blog = Blog.mount({
+    root: document.getElementById('app'),
+    title: 'Reading Down',
+    subtitle: 'A blog about the layout it is printed in',
+    home: '#',
+    links: [
+      { label: 'Posts', href: '#', current: true },
+      { label: 'Notes', href: '#the-rail' },
+      { label: 'Projects', href: '#the-api' },
+      { label: 'Now', href: '#narrow-screens' }
+    ],
+    about: { label: 'About', href: '#why-this-blog-exists' },
+    sections: [
+      { id: 'top', title: 'Top posts', content: pick('t-top') },
+      { id: 'roll', title: 'Blogroll', content: pick('t-roll'),
+        action: { href: opml, label: 'Blogroll as OPML', icon: 'opml', download: 'blogroll.opml' } },
+      { id: 'archive', title: 'Archive', content: pick('t-archive'),
+        action: { href: rss, label: 'RSS feed', icon: 'rss', download: 'feed.xml' } }
+    ],
+    load: load,
+    has: function (id) { return !!index[id]; }
+  });
+
+  /* Rail contents — the app's markup, reached through blog.section. */
+  var top = ['deep-links', 'hello-world', 'the-case-for-plain-text', 'on-finishing-things', 'linkable-headers'];
+  blog.section('top').querySelector('#topList').innerHTML = top.map(function (id) {
+    var p = index[id];
+    var d = new Date(p.date + 'T00:00:00Z').toLocaleDateString(undefined, { year: 'numeric', month: 'short', timeZone: 'UTC' });
+    return '<li><a href="#' + id + '">' + esc(p.title) + '</a><small>' + d + '</small></li>';
+  }).join('');
+
+  blog.section('roll').querySelector('#rollList').innerHTML = roll.map(function (b) {
+    return '<li><a href="' + esc(b.site) + '" rel="noopener" target="_blank">' + esc(b.title) + '</a><small>' + esc(b.note) + '</small></li>';
+  }).join('');
+
+  blog.section('archive').querySelector('#archiveTree').appendChild(Blog.archive(posts));
+})();
+</script>

@@ -1,0 +1,39 @@
+/* Default design tokens — every colour and typeface the engine draws with.
+ *
+ * A site overrides these with sites/<name>/tokens.css, loaded after this file;
+ * it need only name the tokens it changes.
+ *
+ * Themed in the usual dialect: values on :root, redefined for dark under
+ * prefers-color-scheme guarded by :root:not([data-theme="light"]) and again under
+ * :root[data-theme="dark"], so [data-theme] always wins. CSS cannot share one body
+ * across that media-query boundary, so the dark values are written twice;
+ * tools/check_tokens.py fails when the two copies disagree, in this file or any
+ * site's.
+ *
+ * Names are roles, not appearances: --ink is body text whatever colour it is.
+ */
+:root{
+  --ground:#F5F7F6; --surface:#FFFFFF; --raised:#FAFBFA;
+  --ink:#1B211F; --soft:#5B6462; --faint:#9AA3A0;
+  --line:#E0E5E2; --line-soft:#EDF0EE;
+  --accent:#35655A; --accent-ink:#FFFFFF; --accent-soft:#E4EEEA;
+  --blocked:#8A7B4F; --blocked-soft:#F3EEE0;
+  --serif:"Spectral",Georgia,"Times New Roman",serif;
+  --sans:-apple-system,"Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#121614; --surface:#1A1F1D; --raised:#202624;
+  --ink:#E7EBE9; --soft:#9AA39F; --faint:#6C7571;
+  --line:#2A312E; --line-soft:#232A27;
+  --accent:#72A793; --accent-ink:#10201B; --accent-soft:#1E2E29;
+  --blocked:#B9A570; --blocked-soft:#282419;
+}}
+/* @dark:begin — must match the prefers-color-scheme block above; tools/check_tokens.py */
+:root[data-theme="dark"]{
+  --ground:#121614; --surface:#1A1F1D; --raised:#202624;
+  --ink:#E7EBE9; --soft:#9AA39F; --faint:#6C7571;
+  --line:#2A312E; --line-soft:#232A27;
+  --accent:#72A793; --accent-ink:#10201B; --accent-soft:#1E2E29;
+  --blocked:#B9A570; --blocked-soft:#282419;
+}
+/* @dark:end */

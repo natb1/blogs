@@ -1,0 +1,375 @@
+/* The blog layout — banner, an endless feed of articles, and a rail beside it.
+ *
+ * A page you read down. Everything it draws is namespaced `blog-`, every colour
+ * comes from tokens.css (a site's own, or engine/tokens.css), and every dimension
+ * it depends on is a custom property below. Pair it with blog-layout.js, which
+ * owns the state.
+ *
+ * Geometry
+ *   +--------------------------------------------------+
+ *   | banner: title                         about  [≡] |
+ *   |         subtitle                                 |
+ *   |         links · links · links                    |
+ *   +-------------------------------------+------------+
+ *   | feed (scrolls, loads as it goes)    | rail       |
+ *   |   article                           | (scrolls   |
+ *   |   article                           |  on its    |
+ *   |   …                                 |  own)      |
+ *   +-------------------------------------+------------+
+ *
+ * The feed takes whatever the rail does not. When the two no longer fit side by
+ * side, the rail leaves the row and becomes an overlay opened from the banner —
+ * blog-layout.js measures and sets data-rail on the root, and this file draws
+ * whatever it is told. Below the rail there is nowhere to put it: the feed never
+ * ends, so anything stacked under it would never be reached.
+ */
+
+/* The layout owns the viewport, so its host has to give it one to own. */
+html:has(.blog), html:has(.blog) body { height: 100%; }
+
+/* Named rather than `.blog *`, so an app's own content keeps its box model. */
+.blog, .blog-banner, .blog-head, .blog-end, .blog-links, .blog-feed, .blog-feed-inner,
+.blog-article, .blog-status, .blog-rail, .blog-section, .blog-section-head,
+.blog-btn, .blog-scrim { box-sizing: border-box; }
+
+.blog{
+  /* Override these on .blog to retune the layout; nothing below hard-codes them. */
+  --blog-rail-w: 300px;
+  --blog-feed-min: 520px;
+  --blog-measure: 68ch;
+  --blog-gutter: 24px;
+  --blog-gap: 10px;
+  --blog-z-rail: 20;
+  --blog-z-scrim: 10;
+
+  overflow-wrap: break-word;
+
+  /* The rail's column as it currently stands: an overlaid rail takes none. */
+  --_rail: var(--blog-rail-w);
+
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--_rail);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "banner banner"
+    "feed   rail";
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+.blog[data-rail="overlay"]{ --_rail: 0px; --blog-gutter: 16px; }
+
+/* ---- banner -------------------------------------------------------------- */
+
+/* A banner, not a toolbar: it is sized by what it says, not to a fixed strip. */
+.blog-banner{
+  grid-area: banner;
+  padding: 28px var(--blog-gutter) 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.blog-head{
+  display: flex;
+  align-items: flex-start;
+  gap: var(--blog-gap);
+}
+.blog-titles{ flex: 1 1 auto; min-width: 0; }
+.blog-title{
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-weight: 600;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.blog-title a{ color: inherit; text-decoration: none; }
+.blog-subtitle{
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--soft);
+}
+.blog-subtitle[hidden]{ display: none; }
+
+/* The about link and, when the rail is overlaid, the button that opens it. Right
+   aligned against the title, so they stay put however the links below wrap. */
+.blog-end{
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+}
+.blog-about{
+  color: var(--soft);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.blog-about:hover{ background: var(--raised); color: var(--ink); }
+.blog-about[aria-current]{ color: var(--accent); }
+
+/* The site's own navigation. Tabs that sit on the banner's bottom edge, so the
+   current one's underline is the banner's border. Wraps rather than scrolls:
+   there are few of them and every one should be seen. */
+.blog-links{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 18px;
+  margin-top: 18px;
+}
+.blog-links[hidden]{ display: none; }
+.blog-links a{
+  color: var(--soft);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 0 10px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+}
+.blog-links a:hover{ color: var(--ink); }
+.blog-links a[aria-current]{ color: var(--accent); border-bottom-color: var(--accent); }
+
+/* On a narrow screen the banner is a fixed cost on every line read, so once the
+   reader is under way it sheds the subtitle and some padding. */
+.blog[data-rail="overlay"] .blog-banner{ padding-top: 18px; }
+.blog[data-rail="overlay"][data-scrolled="true"] .blog-subtitle{ display: none; }
+.blog[data-rail="overlay"][data-scrolled="true"] .blog-links{ margin-top: 8px; }
+
+/* ---- icon buttons -------------------------------------------------------- */
+
+.blog-btn{
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--soft);
+  cursor: pointer;
+}
+.blog-btn[hidden]{ display: none; }
+.blog-btn:hover{ background: var(--raised); color: var(--ink); }
+.blog-btn[aria-expanded="true"]{ background: var(--accent-soft); color: var(--accent); }
+.blog-btn svg{ width: 18px; height: 18px; display: block; }
+/* Feed and blogroll buttons are the ones a reader goes looking for by shape. */
+.blog-section-head .blog-btn{ width: 28px; height: 28px; }
+/* The button leads its heading, pulled left so its glyph lines up with the
+   section's text rather than its hover area does. */
+.blog-section-head .blog-btn:first-child{ margin-left: -6px; margin-right: -2px; }
+.blog-section-head .blog-btn svg{ width: 16px; height: 16px; }
+
+.blog :is(a, button, summary):focus-visible,
+.blog-article:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+.blog-article:focus:not(:focus-visible){ outline: none; }
+
+/* ---- feed ---------------------------------------------------------------- */
+
+.blog-feed{
+  grid-area: feed;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 0 var(--blog-gutter);
+  /* A query container, so the last article can be sized to the feed's height. */
+  container-type: size;
+}
+.blog-feed:focus{ outline: none; }
+.blog-feed-inner{
+  max-width: var(--blog-measure);
+  margin: 0 auto;
+  padding-bottom: 48px;
+}
+
+.blog-article{
+  padding: 32px 0;
+  border-bottom: 1px solid var(--line);
+  /* Where a deep link lands: just inside the top of the feed. */
+  scroll-margin-top: 0;
+}
+.blog-article-head{ margin-bottom: 16px; }
+/* Once the blog has ended, the last article is at least a feed tall, so a link to
+   it lands with its header at the top like any other. */
+.blog[data-feed-end="true"] .blog-article:last-of-type{
+  min-height: 100cqh;
+  border-bottom: 0;
+}
+.blog-article-title{
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.blog-article-title a{ color: inherit; text-decoration: none; }
+.blog-article-title a:hover{ text-decoration: underline; text-decoration-thickness: 1px;
+                              text-underline-offset: 4px; }
+/* The header is the article's link, and says so on approach: a # after it. */
+.blog-article-title a::after{
+  content: "#";
+  margin-left: .35em;
+  color: var(--faint);
+  font-weight: 400;
+  opacity: 0;
+}
+.blog-article-title a:is(:hover, :focus-visible)::after{ opacity: 1; }
+.blog-article-meta{
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Prose defaults for what an app puts in an article. Kept to the elements a post
+   is made of; an app overrides any of them by being more specific. */
+.blog-article-body{
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.7;
+}
+.blog-article-body > :first-child{ margin-top: 0; }
+.blog-article-body > :last-child{ margin-bottom: 0; }
+.blog-article-body :is(p, ul, ol, blockquote, pre, figure){ margin: 0 0 1em; }
+.blog-article-body :is(h3, h4){ font-size: 1.05em; margin: 1.6em 0 .5em; }
+.blog-article-body a{ color: var(--accent); text-underline-offset: 3px; }
+.blog-article-body blockquote{ padding-left: 1em; border-left: 3px solid var(--line);
+                               color: var(--soft); font-style: italic; }
+.blog-article-body :is(img, video){ max-width: 100%; height: auto; }
+.blog-article-body code{ font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                         font-size: .82em; background: var(--raised);
+                         border: 1px solid var(--line-soft); border-radius: 4px;
+                         padding: 1px 5px; }
+.blog-article-body pre{ font-size: 14px; line-height: 1.55; overflow-x: auto;
+                        background: var(--surface); border: 1px solid var(--line);
+                        border-radius: 10px; padding: 12px 14px; }
+.blog-article-body pre code{ background: none; border: 0; padding: 0; font-size: inherit; }
+
+/* The line under the last article: loading, the end, or a retry. */
+.blog-status{
+  padding: 28px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--faint);
+}
+.blog-status:empty{ display: none; }
+.blog-status button{
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 12px;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+/* ---- rail ---------------------------------------------------------------- */
+
+.blog-rail{
+  grid-area: rail;
+  width: min(var(--blog-rail-w), 100%);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 18px 32px;
+  background: var(--ground);
+}
+.blog-rail:focus{ outline: none; }
+
+/* Overlaid, the rail comes in over the feed from the right and stops under the
+   banner, which holds the button that closes it. */
+.blog[data-rail="overlay"] .blog-rail{
+  grid-row: 2;
+  grid-column: 1 / -1;
+  justify-self: end;
+  z-index: var(--blog-z-rail);
+  background: var(--surface);
+  box-shadow: -4px 0 24px rgba(0,0,0,.18);
+}
+.blog[data-rail="overlay"]:not([data-rail-open="true"]) .blog-rail{ display: none; }
+
+.blog-scrim{
+  grid-row: 2;
+  grid-column: 1 / -1;
+  z-index: var(--blog-z-scrim);
+  background: rgba(10,14,12,.38);
+}
+.blog-scrim[hidden]{ display: none !important; }
+
+.blog-section{ padding-top: 20px; }
+.blog-section + .blog-section{ margin-top: 8px; border-top: 1px solid var(--line-soft); }
+.blog-section-head{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin-bottom: 8px;
+}
+.blog-section-title{
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+.blog-section-body{ font-size: 14px; line-height: 1.45; }
+
+/* Two shapes of rail content the layout expects to hold, drawn here so every app
+   draws them alike: a plain list of links, and the archive tree that
+   Blog.archive() builds. A link to the article on screen is marked current. */
+.blog-list, .blog-tree, .blog-tree ul{ list-style: none; margin: 0; padding: 0; }
+.blog-list li + li{ margin-top: 8px; }
+.blog-rail a{ color: var(--ink); text-decoration: none; }
+.blog-rail a:hover{ color: var(--accent); text-decoration: underline;
+                    text-underline-offset: 3px; }
+.blog-rail a[aria-current]{ color: var(--accent); font-weight: 600; }
+.blog-list small{ display: block; color: var(--faint); font-size: 12px; margin-top: 1px; }
+
+.blog-tree summary{
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 0;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+  font-weight: 600;
+}
+.blog-tree summary::-webkit-details-marker{ display: none; }
+.blog-tree summary::before{
+  content: "";
+  flex: none;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent var(--faint);
+  transform: translateY(-1px);
+}
+.blog-tree details[open] > summary::before{ transform: translateY(-1px) rotate(90deg); }
+.blog-tree .blog-count{ color: var(--faint); font-weight: 400; font-size: 12px;
+                        font-variant-numeric: tabular-nums; }
+.blog-tree ul{ padding-left: 14px; }
+.blog-tree ul ul{ padding: 2px 0 6px 12px; border-left: 1px solid var(--line); margin-left: 3px; }
+.blog-tree ul summary{ font-weight: 400; color: var(--soft); }
+.blog-tree ul ul li{ padding: 3px 0 3px 4px; }
+
+@media (prefers-reduced-motion: reduce){
+  .blog *{ animation: none !important; transition: none !important; }
+}

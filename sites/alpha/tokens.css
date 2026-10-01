@@ -1,0 +1,15 @@
+/* Alpha — the tokens this site changes from engine/tokens.css, which loads first.
+ * Name only what differs. Dark values are written twice, as in the engine's
+ * sheet; tools/check_tokens.py keeps the copies honest.
+ */
+:root{
+  --accent:#35655A; --accent-soft:#E4EEEA;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --accent:#72A793; --accent-soft:#1E2E29;
+}}
+/* @dark:begin — must match the prefers-color-scheme block above; tools/check_tokens.py */
+:root[data-theme="dark"]{
+  --accent:#72A793; --accent-soft:#1E2E29;
+}
+/* @dark:end */

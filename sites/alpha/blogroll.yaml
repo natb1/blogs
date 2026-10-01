@@ -1,0 +1,3 @@
+# The blogs this one reads. The build writes blogroll.opml from this list.
+#   - {title: "Name", site: "https://…", feed: "https://…/feed.xml", note: "one line"}
+[]
