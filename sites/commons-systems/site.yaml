@@ -1,7 +1,7 @@
 # The site's own words. The build reads this; nothing here is styling.
-title: "Alpha"
+title: "commons.systems"
 subtitle: "Stub subtitle for the first blog"
-base_url: "https://alpha.example.com"   # placeholder until a domain is chosen
+base_url: "https://commons.systems"
 links:
   - {label: Posts, href: /}
 about: {label: About, href: /about/}

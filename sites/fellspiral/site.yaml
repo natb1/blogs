@@ -1,7 +1,7 @@
 # The site's own words. The build reads this; nothing here is styling.
-title: "Beta"
+title: "fellspiral"
 subtitle: "Stub subtitle for the second blog"
-base_url: "https://beta.example.com"   # placeholder until a domain is chosen
+base_url: "https://fellspiral.pages.dev"   # the Pages address, until a domain is attached
 links:
   - {label: Posts, href: /}
 about: {label: About, href: /about/}

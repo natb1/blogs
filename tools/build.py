@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build one site folder into static files.
 
-    python3 tools/build.py alpha            # → dist/alpha, drafts left out
-    python3 tools/build.py alpha --drafts   # drafts included
+    python3 tools/build.py fellspiral          # → dist/fellspiral, drafts left out
+    python3 tools/build.py fellspiral --drafts # drafts included
 
 Cloudflare Pages runs this itself and sets CF_PAGES_BRANCH; a build of any branch
 but main is a preview, and a preview includes drafts without being asked.

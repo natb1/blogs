@@ -12,7 +12,7 @@ engine/
   page.css                           plain pages — one article, About — with no script
   demo.html                          the layout's harness, a blog written about itself
 sites/
-  alpha/  beta/                      one folder per blog, same shape:
+  commons-systems/  fellspiral/      one folder per blog, same shape:
     site.yaml                        title, subtitle, links, rail sections
     tokens.css                       the tokens this site changes
     blogroll.yaml                    the blogs it reads → blogroll.opml
@@ -27,9 +27,9 @@ tools/
 
 ```sh
 pip install -r requirements.txt
-python3 tools/build.py alpha beta        # → dist/alpha, dist/beta
-python3 tools/build.py alpha --drafts    # with posts marked `draft: true`
-python3 -m http.server -d dist/alpha 8000
+python3 tools/build.py commons-systems fellspiral   # → dist/commons-systems, dist/fellspiral
+python3 tools/build.py fellspiral --drafts   # with posts marked `draft: true`
+python3 -m http.server -d dist/fellspiral 8000
 ```
 
 A site builds to static files: `index.html` mounts the layout and fetches
@@ -43,14 +43,14 @@ Cloudflare Pages builds and deploys each site through its Git integration: no
 token, nothing stored in GitHub. Each site is its own Pages project connected to
 this repo, set up once in the Cloudflare dashboard:
 
-| Setting | Value (for `alpha`) |
+| Setting | Value (for `fellspiral`) |
 |---|---|
 | Production branch | `main` |
 | Framework preset | None |
-| Build command | `pip install -r requirements.txt && python3 tools/build.py alpha` |
-| Build output directory | `dist/alpha` |
+| Build command | `pip install -r requirements.txt && python3 tools/build.py fellspiral` |
+| Build output directory | `dist/fellspiral` |
 | Root directory | *(leave empty)* |
-| Build watch paths (include) | `engine/*`, `tools/*`, `requirements.txt`, `sites/alpha/*` |
+| Build watch paths (include) | `engine/*`, `tools/*`, `requirements.txt`, `sites/fellspiral/*` |
 
 A push to `main` deploys production with drafts left out. Any other branch gets a
 preview at `<branch>.<project>.pages.dev` with drafts included — the build reads
