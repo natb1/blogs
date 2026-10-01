@@ -1,0 +1,30 @@
+# Build every site, so a broken build shows on the pull request.
+#
+# Deploying is Cloudflare's job: each site is a Pages project connected to this
+# repo, and Cloudflare builds and publishes it on push. Nothing here holds a
+# credential.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python3 tools/check_tokens.py
+      - name: Build every site, as production and as a preview
+        run: |
+          python3 tools/build.py $(ls sites)
+          CF_PAGES_BRANCH=preview python3 tools/build.py $(ls sites)

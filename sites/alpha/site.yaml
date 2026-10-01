@@ -2,7 +2,6 @@
 title: "Alpha"
 subtitle: "Stub subtitle for the first blog"
 base_url: "https://alpha.example.com"   # placeholder until a domain is chosen
-pages_project: "natb1-blog-alpha"   # the Cloudflare Pages project this site deploys to
 links:
   - {label: Posts, href: /}
 about: {label: About, href: /about/}

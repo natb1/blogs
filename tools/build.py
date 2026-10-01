@@ -2,7 +2,10 @@
 """Build one site folder into static files.
 
     python3 tools/build.py alpha            # → dist/alpha, drafts left out
-    python3 tools/build.py alpha --drafts   # drafts included (previews)
+    python3 tools/build.py alpha --drafts   # drafts included
+
+Cloudflare Pages runs this itself and sets CF_PAGES_BRANCH; a build of any branch
+but main is a preview, and a preview includes drafts without being asked.
 
 What it writes, and for whom:
 
@@ -18,7 +21,7 @@ What it writes, and for whom:
 A post is posts/YYYY-MM-DD-slug.md with front matter (title, date, draft). The
 slug is the article's id everywhere: its hash in the feed, its folder in posts/.
 """
-import argparse, datetime, html, json, re, shutil, sys
+import argparse, datetime, html, json, os, re, shutil, sys
 from email.utils import format_datetime
 from pathlib import Path
 
@@ -187,5 +190,6 @@ if __name__ == "__main__":
     ap.add_argument("--drafts", action="store_true", help="include posts marked draft")
     ap.add_argument("--out", default="dist", type=Path)
     a = ap.parse_args()
+    preview = os.environ.get("CF_PAGES_BRANCH", "main") != "main"
     for s in a.site:
-        build(s, a.drafts, (ROOT / a.out).resolve())
+        build(s, a.drafts or preview, (ROOT / a.out).resolve())

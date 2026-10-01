@@ -13,7 +13,7 @@ engine/
   demo.html                          the layout's harness, a blog written about itself
 sites/
   alpha/  beta/                      one folder per blog, same shape:
-    site.yaml                        title, subtitle, links, rail sections, Pages project
+    site.yaml                        title, subtitle, links, rail sections
     tokens.css                       the tokens this site changes
     blogroll.yaml                    the blogs it reads → blogroll.opml
     about.md
@@ -39,18 +39,27 @@ without JS land somewhere real.
 
 ## Deploy
 
-`.github/workflows/deploy.yml` builds each folder under `sites/` and deploys it to
-the Cloudflare Pages project named by `pages_project` in its `site.yaml`.
+Cloudflare Pages builds and deploys each site through its Git integration: no
+token, nothing stored in GitHub. Each site is its own Pages project connected to
+this repo, set up once in the Cloudflare dashboard:
 
-| Event | Result |
+| Setting | Value (for `alpha`) |
 |---|---|
-| Push to `main` | Production: `<project>.pages.dev`, drafts left out |
-| Any other branch, or a pull request | Preview: `<branch>.<project>.pages.dev`, drafts included |
+| Production branch | `main` |
+| Framework preset | None |
+| Build command | `pip install -r requirements.txt && python3 tools/build.py alpha` |
+| Build output directory | `dist/alpha` |
+| Root directory | *(leave empty)* |
+| Build watch paths (include) | `engine/*`, `tools/*`, `requirements.txt`, `sites/alpha/*` |
 
-It needs two repository secrets, `CLOUDFLARE_API_TOKEN` (permission *Account ›
-Cloudflare Pages › Edit*) and `CLOUDFLARE_ACCOUNT_ID`. Projects are created on
-first deploy. Custom domains are attached in the Cloudflare dashboard; set
+A push to `main` deploys production with drafts left out. Any other branch gets a
+preview at `<branch>.<project>.pages.dev` with drafts included — the build reads
+Cloudflare's `CF_PAGES_BRANCH` to tell which it is. `.python-version` picks the
+Python the build runs on. Custom domains are attached in the dashboard; set
 `base_url` in `site.yaml` to match, since `feed.xml` is built from it.
+
+`.github/workflows/check.yml` builds every site on each push and pull request, so
+a broken build shows on the PR rather than only in Cloudflare.
 
 ## Try the layout
 
