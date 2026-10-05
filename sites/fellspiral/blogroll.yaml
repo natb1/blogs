@@ -1,3 +1,5 @@
 # The blogs this one reads. The build writes blogroll.opml from this list.
 #   - {title: "Name", site: "https://…", feed: "https://…/feed.xml", note: "one line"}
-[]
+- {title: "BASTIONLAND", site: "https://www.bastionland.com/", feed: "https://www.bastionland.com/feeds/posts/default"}
+- {title: "New School Revolution", site: "https://newschoolrevolution.com/", feed: "https://newschoolrevolution.com/feed/"}
+- {title: "Prismatic Wasteland", site: "https://www.prismaticwasteland.com/", feed: "https://www.prismaticwasteland.com/?format=rss"}

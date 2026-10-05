@@ -1,12 +1,24 @@
 # The site's own words. The build reads this; nothing here is styling.
 title: "fellspiral"
-subtitle: "Stub subtitle for the second blog"
+subtitle: "A TTRPG game blog by Nate. Nate likes games about social role play."
 base_url: "https://fellspiral.pages.dev"   # the Pages address, until a domain is attached
 links:
   - {label: Posts, href: /}
 about: {label: About, href: /about/}
-# Rail sections, in order. top lists post slugs; the others are generated.
+# Rail sections, in order. links are lists of the site's own; top lists post
+# slugs; the others are generated.
 rail:
+  links:
+    - title: Links
+      items:
+        - {label: itch.io, href: "https://natethenoob.itch.io"}
+        - {label: No Land Beyond, href: "https://discord.gg/sFHXtyF", note: Find a Local Game in Baltimore}
+    - title: Games I'm Playing
+      items:
+        - {label: Mythic Bastionland, href: "https://chrismcdee.itch.io/mythic-bastionland"}
+        - {label: ALIEN, href: "https://freeleaguepublishing.com/games/alien/"}
+        - {label: Cairn, href: "https://cairnrpg.com/"}
+        - {label: Triangle Agency, href: "https://shop.hauntedtable.games/"}
   top: []
   blogroll: true
   archive: true
