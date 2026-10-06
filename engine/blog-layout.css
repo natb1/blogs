@@ -135,6 +135,7 @@ html:has(.blog), html:has(.blog) body { height: 100%; }
   border-bottom: 2px solid transparent;
 }
 .blog-links a:hover{ color: var(--ink); }
+.blog-links a[data-end]{ margin-left: auto; }
 .blog-links a[aria-current]{ color: var(--accent); border-bottom-color: var(--accent); }
 
 /* On a narrow screen the banner is a fixed cost on every line read, so once the

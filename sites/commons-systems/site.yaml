@@ -4,7 +4,7 @@ subtitle: "Build with commons.systems. Learn to run without."
 base_url: "https://commons.systems"
 links:
   - {label: Posts, href: /}
-about: {label: About, href: /about/}
+  - {label: About, href: /about/, end: true}   # end: held to the right of the bar
 # Rail sections, in order. links are lists of the site's own; top lists post
 # slugs; the others are generated.
 rail:

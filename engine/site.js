@@ -36,7 +36,7 @@
   if (rail.archive) sections.push({ id: 'archive', title: 'Archive', content: '<div data-archive></div>',
     action: { href: 'feed.xml', label: 'RSS feed', icon: 'rss' } });
 
-  var here = function (l) { return { label: l.label, href: l.href, current: l.href === '/' }; };
+  var here = function (l) { return { label: l.label, href: l.href, current: l.href === '/', end: !!l.end }; };
 
   var blog = Blog.mount({
     root: document.getElementById('app'),
