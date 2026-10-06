@@ -8,7 +8,7 @@
  *   const blog = Blog.mount({
  *     root:     document.getElementById('app'),
  *     title:    'A Blog',  subtitle: 'Of things',  home: '#',
- *     links:    [ {label, href, current} ],       // the banner's navigation
+ *     links:    [ {label, href, current, end} ],  // the banner's navigation; end holds one to the right
  *     about:    {label, href, current},           // right aligned in the banner
  *     sections: [ {id, title, content, action: {href, label, icon, download}} ],
  *     load:     function (cursor) { return Promise<{articles, next}> },
@@ -146,6 +146,7 @@
       var a = el('a', null, { href: l.href });
       a.textContent = l.label;
       if (l.current) a.setAttribute('aria-current', 'page');
+      if (l.end) a.setAttribute('data-end', '');
       links.appendChild(a);
     });
     links.hidden = !links.firstChild;

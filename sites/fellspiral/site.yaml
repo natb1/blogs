@@ -4,7 +4,6 @@ subtitle: "A TTRPG game blog by Nate. Nate likes games about social role play."
 base_url: "https://fellspiral.pages.dev"   # the Pages address, until a domain is attached
 links:
   - {label: Posts, href: /}
-about: {label: About, href: /about/}
 # Rail sections, in order. links are lists of the site's own; top lists post
 # slugs; the others are generated.
 rail:
