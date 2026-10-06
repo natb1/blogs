@@ -14,6 +14,7 @@ engine/
 sites/
   commons-systems/  fellspiral/      one folder per blog, same shape:
     site.yaml                        title, subtitle, links, rail sections
+    static/                          files served as they are: a post's images
     tokens.css                       the tokens this site changes
     blogroll.yaml                    the blogs it reads → blogroll.opml
     about.md

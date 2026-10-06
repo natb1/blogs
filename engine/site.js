@@ -20,6 +20,10 @@
 
   /* A rail section is listed only when it has something in it. */
   var rail = SITE.rail || {}, sections = [];
+  (rail.links || []).forEach(function (s, i) { sections.push({ id: 'links-' + i, title: s.title || 'Links',
+    content: list(s.items.map(function (l) {
+      return '<li><a href="' + esc(l.href) + '" rel="noopener">' + esc(l.label) + '</a>' + (l.note ? '<small>' + esc(l.note) + '</small>' : '') + '</li>';
+    })) }); });
   if (SITE.top.length) sections.push({ id: 'top', title: 'Top posts',
     content: list(SITE.top.map(function (id) {
       return '<li><a href="#' + encodeURIComponent(id) + '">' + esc(byId[id].title) + '</a><small>' + month(byId[id].date) + '</small></li>';

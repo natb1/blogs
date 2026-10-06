@@ -1,3 +1,5 @@
 # The blogs this one reads. The build writes blogroll.opml from this list.
 #   - {title: "Name", site: "https://…", feed: "https://…/feed.xml", note: "one line"}
-[]
+- {title: "Anthropic Engineering", site: "https://www.anthropic.com/engineering"}
+- {title: "Claude Code Blog", site: "https://claude.com/blog/category/claude-code"}
+- {title: "Martin Fowler — Generative AI", site: "https://martinfowler.com/tags/generative%20AI.html"}

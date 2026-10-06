@@ -17,6 +17,8 @@ What it writes, and for whom:
     feed.xml                RSS, linking the plain pages
     blogroll.opml           blogroll.yaml, for a feed reader to import
     engine/ · site.css      the engine's files and the site's tokens
+    (static/)               the site's own files, copied to the root as they are —
+                            a post's images, written in markdown as /name.webp
 
 A post is posts/YYYY-MM-DD-slug.md with front matter (title, date, draft). The
 slug is the article's id everywhere: its hash in the feed, its folder in posts/.
@@ -41,7 +43,7 @@ def read_md(path):
     """(front matter, rendered HTML) of a markdown file."""
     m = FRONT.match(path.read_text())
     meta, body = (yaml.safe_load(m.group(1)) or {}, m.group(2)) if m else ({}, path.read_text())
-    return meta, markdown.markdown(body, extensions=["fenced_code", "tables", "smarty"])
+    return meta, markdown.markdown(body, extensions=["fenced_code", "tables", "smarty", "sane_lists"])
 
 
 def read_posts(site_dir, drafts):
@@ -149,6 +151,8 @@ def build(name, drafts, out_root):
     out = out_root / name
     if out.exists():
         shutil.rmtree(out)
+    if (src / "static").exists():
+        shutil.copytree(src / "static", out)
     (out / "engine").mkdir(parents=True)
     for f in ("tokens.css", "blog-layout.css", "blog-layout.js", "page.css", "site.js"):
         shutil.copy(ROOT / "engine" / f, out / "engine" / f)

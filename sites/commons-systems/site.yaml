@@ -1,12 +1,17 @@
 # The site's own words. The build reads this; nothing here is styling.
 title: "commons.systems"
-subtitle: "Stub subtitle for the first blog"
+subtitle: "Build with commons.systems. Learn to run without."
 base_url: "https://commons.systems"
 links:
   - {label: Posts, href: /}
 about: {label: About, href: /about/}
-# Rail sections, in order. top lists post slugs; the others are generated.
+# Rail sections, in order. links are lists of the site's own; top lists post
+# slugs; the others are generated.
 rail:
+  links:
+    - title: Links
+      items:
+        - {label: Source, href: "https://github.com/natb1/commons.systems"}
   top: []
   blogroll: true
   archive: true
