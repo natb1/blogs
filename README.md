@@ -13,7 +13,7 @@ engine/
   demo.html                          the layout's harness, a blog written about itself
 sites/
   commons-systems/  fellspiral/      one folder per blog, same shape:
-    site.yaml                        title, subtitle, links, rail sections
+    site.yaml                        title, subtitle, links, rail sections, GA ID
     static/                          files served as they are: a post's images
     tokens.css                       the tokens this site changes
     blogroll.yaml                    the blogs it reads → blogroll.opml
