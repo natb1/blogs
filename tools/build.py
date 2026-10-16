@@ -20,6 +20,10 @@ What it writes, and for whom:
     (static/)               the site's own files, copied to the root as they are —
                             a post's images, written in markdown as /name.webp
 
+A production build tags every page with the site's Google Analytics measurement
+ID (`analytics` in site.yaml); a preview or --drafts build leaves it out, so
+drafts and branches never count as visits.
+
 A post is posts/YYYY-MM-DD-slug.md with front matter (title, date, draft). The
 slug is the article's id everywhere: its hash in the feed, its folder in posts/.
 """
@@ -36,6 +40,7 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">')
 FRONT = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
 NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})-(.+)$")
+GA_ID = re.compile(r"^G-[A-Z0-9]+$")
 esc = html.escape
 
 
@@ -67,6 +72,12 @@ def read_posts(site_dir, drafts):
     return sorted(posts, key=lambda p: p["date"], reverse=True)
 
 
+def gtag(ga_id):
+    return (f'<script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>\n'
+            '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
+            f"gtag('js',new Date());gtag('config','{ga_id}');</script>\n")
+
+
 def head(site, title, up, extra=""):
     return (f'<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -74,7 +85,8 @@ def head(site, title, up, extra=""):
             f'<link rel="stylesheet" href="{up}engine/tokens.css">\n'
             f'<link rel="stylesheet" href="{up}site.css">\n'
             f'<link rel="alternate" type="application/rss+xml" title="{esc(site["title"])}" href="{up}feed.xml">\n'
-            f'{extra}')
+            f'{extra}'
+            + (gtag(site["_analytics"]) if site.get("_analytics") else ""))
 
 
 def plain_page(site, up, title, body, meta="", foot=""):
@@ -136,6 +148,10 @@ def build(name, drafts, out_root):
     if not (src / "site.yaml").exists():
         sys.exit(f"no such site: sites/{name}")
     site = yaml.safe_load((src / "site.yaml").read_text())
+    ga_id = site.get("analytics")
+    if ga_id and not GA_ID.match(ga_id):
+        sys.exit(f"{name}: analytics is a measurement ID like G-XXXXXXXXXX, not {ga_id!r}")
+    site["_analytics"] = None if drafts else ga_id
     site["_blogroll"] = roll = yaml.safe_load((src / "blogroll.yaml").read_text()) or []
     posts = read_posts(src, drafts)
     index = [{"id": p["id"], "title": p["title"], "date": p["date"]} for p in posts]

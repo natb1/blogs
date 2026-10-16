@@ -2,6 +2,7 @@
 title: "commons.systems"
 subtitle: "Build with commons.systems. Learn to run without."
 base_url: "https://commons.systems"
+analytics: "G-5XQKYC3WDE"   # Google Analytics measurement ID; production builds only
 links:
   - {label: Posts, href: /}
   - {label: About, href: /about/, end: true}   # end: held to the right of the bar
