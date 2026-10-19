@@ -12,7 +12,7 @@ rail:
   links:
     - title: Links
       items:
-        - {label: Source, href: "https://github.com/natb1/commons.systems"}
+        - {label: Source, href: "https://github.com/natb1/CanonDB"}
   top: []
   blogroll: true
   archive: true
